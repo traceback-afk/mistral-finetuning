@@ -51,7 +51,6 @@ logging_steps: 1
 warmup_steps: 10
 evals_per_epoch: 1
 saves_per_epoch: 1
-save_steps: 100
 weight_decay: 0.0
 
 load_in_8bit: true
