@@ -28,12 +28,12 @@ dataset_prepared_path:
 val_set_size: 0.01  # Smaller val to save memory
 output_dir: ./outputs/out
 
-sequence_len: 2048  # Crucial: reduce to fit memory
+sequence_len: 3072  # Crucial: reduce to fit memory
 sample_packing: true
 pad_to_sequence_len: true
 eval_sample_packing: false
 
-micro_batch_size: 1  # Crucial: reduce to avoid OOM
+micro_batch_size: 2  # Crucial: reduce to avoid OOM
 gradient_accumulation_steps: 8  # Effective batch size = 8
 num_epochs: 3
 
@@ -51,6 +51,7 @@ logging_steps: 1
 warmup_steps: 10
 evals_per_epoch: 1
 saves_per_epoch: 1
+save_steps: 100
 weight_decay: 0.0
 
 load_in_8bit: true
