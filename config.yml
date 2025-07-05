@@ -1,45 +1,73 @@
 base_model: mistralai/Mistral-7B-v0.1
-# optionally might have model_type or tokenizer_type
 model_type: MistralForCausalLM
 tokenizer_type: LlamaTokenizer
-# Automatically upload checkpoint and final model to HF
-# hub_model_id: username/custom_model_name
 
 datasets:
   - path: ./llm_candle_prediction.jsonl
-    type: json
+    type: chat_template
+    chat_template: chatml
+    field_messages: messages
+    message_property_mappings:
+      role: role
+      content: content
+    roles:
+      assistant:
+        - assistant
+        - model
+        - gpt
+      user:
+        - user
+        - human
+    roles_to_train: ["assistant"]
+    train_on_eos: "turn"
+
+special_tokens:
+  eos_token: <|im_end|>
+
+dataset_prepared_path:
+val_set_size: 0.01  # Smaller val to save memory
 output_dir: ./outputs/out
 
-
-val_set_size: 0.05
-sequence_len: 4096
+sequence_len: 2048  # Crucial: reduce to fit memory
 sample_packing: true
 pad_to_sequence_len: true
 eval_sample_packing: false
 
-wandb_project:
-wandb_entity:
-wandb_watch:
-wandb_name:
-wandb_log_model:
+micro_batch_size: 1  # Crucial: reduce to avoid OOM
+gradient_accumulation_steps: 8  # Effective batch size = 8
+num_epochs: 3
 
-gradient_accumulation_steps: 2
-micro_batch_size: 4
-num_epochs: 4
 optimizer: adamw_bnb_8bit
 lr_scheduler: cosine
-learning_rate: 0.000005
+learning_rate: 5e-6
 
-bf16: auto
+bf16: true
+fp16: false
 tf32: true
 
 gradient_checkpointing: true
-resume_from_checkpoint:
+flash_attention: false  # Disable FlashAttention — saves memory
 logging_steps: 1
-flash_attention: true
-
 warmup_steps: 10
-evals_per_epoch: 4
+evals_per_epoch: 1
 saves_per_epoch: 1
 weight_decay: 0.0
-special_tokens:
+
+load_in_8bit: true
+
+adapter: lora
+lora_r: 8
+lora_alpha: 16
+lora_dropout: 0.05
+lora_modules_to_save:
+  - embed_tokens
+  - lm_head
+
+lora_target_modules:
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
